@@ -5,7 +5,7 @@ from PIL import Image
 import json
 
 
-img = Image.open("base.png")
+img = Image.open("./base_pattern.png")
 data = list(img.getdata())
 dim = img.size[0]
 print(len(data))
@@ -39,6 +39,6 @@ for z in range (0, int(dim*dim)):
 
     coords.append([x,y,calculate([x,y],data)/255])
 
-f = open("set.txt", "w")
+f = open("data/data_set.json", "w")
 print(coords)
 json.dump(np.ndarray.tolist(np.int32(coords)), f)    

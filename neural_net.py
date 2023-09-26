@@ -205,14 +205,14 @@ def evolve (nets, size : int, rate = 1):
 def activation (value : int):
     
     #alternate activation function (sigmoid)
-    #return  1/(1 + math.exp(-5*value))
+    return  1/(1 + math.exp(-5*value))
     
     
     
-    if value > 0:
-         return 1
-    else:
-         return 0
+    # if value > 0:
+    #      return 1
+    # else:
+    #      return 0
 
 
 
