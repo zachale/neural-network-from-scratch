@@ -29,16 +29,24 @@ class net:
         self.biases = []
         self.weights = []
 
+        self.b_gradient = []
+        self.w_gradient = []
+
 
         for i in range(0,number_of_layers-1):
             self.biases.append([])
             self.weights.append([])
+            self.b_gradient.append([])
+            self.w_gradient.append([])
             for j in range (0,layers[i+1]):
                 self.biases[i].append(1)
                 self.weights[i].append([])
+                self.b_gradient[i].append(1)
+                self.w_gradient[i].append([])
                 
                 for k in range (0, layers[i]):
                     self.weights[i][j].append(1)
+                    self.w_gradient[i][j].append(1)
 
 
     #function to save the  current weights and biases
@@ -90,7 +98,7 @@ def calculate(net:net, value : list):
                 value = value + (net.layers[v-1].nodes[x].value * net.weights[v-1][w][x])
             value += net.biases[v-1][w]
             
-            net.layers[v].nodes[w].value = activation(value)
+            net.layers[v].nodes[w].value = float(activation(value))
     
     outcome = []    
 
@@ -104,14 +112,15 @@ def calculate(net:net, value : list):
 
 
 #calculates the cost of the neural net given the dataset
-def test(net : net):
+def costFunction(net : net):
     cost = 0
 
     for x in dataset:
         result = calculate(net, [x[0]/dim,x[1]/dim])
         # print(x[2], result[0])
-        cost += pow(abs(x[2] - result[0]),2)
+        cost += pow(abs(result[0]-x[2] ),2)
     return cost
+
 
 #brute forcing the weights and biases, 
 def brute(net : net):
@@ -119,7 +128,7 @@ def brute(net : net):
     while cost > 0:
         generate(net)
 
-        result = test(net)
+        result = costFunction(net)
 
         if result < cost:
 
@@ -132,8 +141,62 @@ def brute(net : net):
     
     f = open("dataset", "w")
     json.dump([w,b], f) 
+
+def gradientDecent(net : net):
+
+    learn_rate = 25
+    h = 0.0001
+
+    generate(net)
+
+    cost = 10
+
+    while cost > 1:
+        cost = costFunction(net)
+        print("working")
+        for x in range(0,len(net.weights)):
+            for y in range(0,len(net.weights[x])):
+                for z in range(0,len(net.weights[x][y])):
+                    net.weights[x][y][z] -= h
+
+                    newCost = costFunction(net)
+
+                    net.weights[x][y][z] += h
+                    net.w_gradient[x][y][z] = (newCost - cost)*learn_rate
+
+        for x in range(0, len(net.biases)):
+            for y in range(0,len(net.biases[x])):
+                    net.biases[x][y] -= h
+                    newCost = costFunction(net)
+                    net.biases[x][y] += h
+                    net.b_gradient[x][y] = (newCost - cost)*learn_rate
+
+        print("applying")
+        image(net)
+        apply_gradient(net)
+        print(cost, net.biases)
+
+        
+
+def apply_gradient(net : net):
+
+
+    for x in range(0,len(net.weights)):
+        for y in range(0,len(net.weights[x])):
+            for z in range(0,len(net.weights[x][y])):
+                net.weights[x][y][z] += net.w_gradient[x][y][z]
+    for x in range(0, len(net.biases)):
+        for y in range(0,len(net.biases[x])):
+            net.biases[x][y] += net.b_gradient[x][y]
+
+
+
+
+
+
     
 #generates a graphic based on the current network
+
 def image (net : net):
     result = []
     for i in range(0,dim):
@@ -146,7 +209,9 @@ def image (net : net):
     
     im = Image.fromarray(np.uint8(result))
 
-    im.save('generated_images/' + str(test(net))+".png")
+    name = 'generated_images/' + str(time.time()) + str(costFunction(net))+".png"
+
+    im.save(name)
 
 #generates random weights and biases for a network
 def generate (net : net, net2 = net(2,10,5,1), rate = 0):
@@ -158,61 +223,17 @@ def generate (net : net, net2 = net(2,10,5,1), rate = 0):
         for y in range(0,len(net.biases[x])):
             net.biases[x][y] = net2.biases[x][y] * ((random.random() *2) -1)
 
-
-#uses a simulated evolution where the top two nets with the lowest cost reproduce
-#NOT WORKING
-def evolve (nets, size : int, rate = 1):
-    cost = 500000
-    best = net(2,10,5,1)
-    best2 = net(2,10,5,1)
-
-    generation = []
-    while cost > 0:
-        generation = []
-        for x in range(0,size):
-            
-            network = net(2,10,5,1)
-            generate(network, nets, rate)
-            price = test(network)
-
-            if price < cost:
-                cost = price
-                best2 = best
-                best = network
-        
-        network = best
-        network2 = best2
-
-        print(cost)
-
-        for w in range(0,len(network.layers)):
-            for x in range(0,len(network.layers[w].nodes)):
-                nets.layers[w].nodes[x].value = network.layers[w].nodes[x].value + network2.layers[w].nodes[x].value
-            
-        for x in range(0,len(nets.weights)):
-            for y in range(0,len(nets.weights[x])):
-                for z in range(0,len(nets.weights[x][y])):
-                    nets.weights[x][y][z] = (network.weights[x][y][z] + network2.weights[x][y][z]) / 2
-        for x in range(0, len(nets.biases)):
-            for y in range(0,len(nets.biases[x])):
-                nets.biases[x][y] = (network.biases[x][y] + network2.biases[x][y]) / 2
-        
-        image(network)
-        image(network2)
-        image(nets)
-
-
 def activation (value : int):
     
     #alternate activation function (sigmoid)
-    return  1/(1 + math.exp(-5*value))
+    # return  1/(1 + math.exp(-5*value))
     
+    return  1/(1 + math.exp(-value))
     
     
     # if value > 0:
-    #      return 1
+    #      return value
     # else:
-    #      return 0
-
+    #       return 0
 
 

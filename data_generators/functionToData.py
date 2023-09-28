@@ -36,7 +36,7 @@ for i in range(0,5):
 
 im = Image.fromarray(np.uint8(result))
 # im.show()
-im.save("base.png")
+im.save("base_pattern.png")
 
 
 coords = []
