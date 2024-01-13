@@ -172,7 +172,7 @@ def gradientDecent(net : net):
         print("applying")
         image(net)
         apply_gradient(net)
-        print(cost, net.biases)
+        print(cost)
 
         
 #horribly innefficient, but it gets the job done
@@ -198,20 +198,21 @@ def apply_gradient(net : net):
 #generates a graphic based on the current network
 
 def image (net : net):
+    global image_number
     result = []
     for i in range(0,dim):
         result.append([])
         for x in range(0,dim):
             result[i].append([])
-            result[i][x] = [calculate(net,[x/dim,i/dim])[0] * 255]
-            result[i][x].append(0)
-            result[i][x].append(0)
+            value = calculate(net,[x/dim,i/dim])[0] * 255
+            result[i][x] = [value]
+            result[i][x].append(value)
+            result[i][x].append(value)
     
     im = Image.fromarray(np.uint8(result))
-    cost = costFunction(net)
-    name = 'generated_images/images-' + image_number +".png"
+    name = 'generated_images/images-{}.png'.format(image_number)
     image_number += 1
-    print(cost)
+
 
     im.save(name)
 
