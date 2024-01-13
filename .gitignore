@@ -1,3 +1,7 @@
 generated_images/*.png
-__pycache__
+main.py
+first_success/*.png
+__pycache__/
 h0001l10/
+data/*.json
+base_pattern.png
