@@ -12,7 +12,6 @@ This is a little bit limiting, but the hidden layers can be any size and can be 
 
 This script creates a grayscale visualization at each learning step, so you can compare it to the base image and see how much more it needs to learn!
 
-
 **Instructions**
 
 Change the base png to a *square* image of any size! (preferably 50px width or smaller)
