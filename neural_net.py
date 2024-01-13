@@ -1,10 +1,8 @@
 import math
 import random
 import json
-import os
 from PIL import Image
 import numpy as np
-import time
 
 number_of_layers = 4
 image_number = 0
@@ -151,7 +149,7 @@ def gradientDecent(net : net):
 
     cost = 10
 
-    while cost > 1:
+    while True:
         cost = costFunction(net)
         print("working")
         for x in range(0,len(net.weights)):
@@ -177,7 +175,9 @@ def gradientDecent(net : net):
         print(cost, net.biases)
 
         
-
+#horribly innefficient, but it gets the job done
+#I would prefer this to be a backwards propagation algorythm
+#I will have to apply my mathematics minor to do that at a later date
 def apply_gradient(net : net):
 
 
@@ -208,8 +208,10 @@ def image (net : net):
             result[i][x].append(0)
     
     im = Image.fromarray(np.uint8(result))
-
-    name = 'generated_images/' + str(time.time()) + str(costFunction(net))+".png"
+    cost = costFunction(net)
+    name = 'generated_images/images-' + image_number +".png"
+    image_number += 1
+    print(cost)
 
     im.save(name)
 
